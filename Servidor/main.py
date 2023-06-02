@@ -3,48 +3,44 @@
 # ==================================================
 
 import socket
-
+import os
 from _thread import *
-import threading
+import random
+import time
 
-print_lock = threading.Lock()
-
-def threaded(c):
-
+def multi_threaded_client(connection):
+	connection.send(str.encode('Server is working:'))
 	while True:
-		data = c.recv(1024)
-		
+		data = connection.recv(2048)
+
+		time.sleep(1 + random.random()*4)
+
+		response = 'O servidor terminou de atender: ' + data.decode('utf-8')
+
 		if not data:
-			print('Erro')
-			
-			print_lock.release()
 			break
-
-		c.send(data)
-
-	c.close()
-
+		connection.sendall(str.encode(response))
+	connection.close()
 
 def main():
-	host = ""
-	port = 8000
-	
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.bind((host, port))
-	print("Socket vinculado à porta", port)
-
-	s.listen(5)
-	print("O socket está ouvindo...")
+	ServerSideSocket = socket.socket()
+	host = '127.0.0.1'
+	port = 2004
+	ThreadCount = 0
+	try:
+		ServerSideSocket.bind((host, port))
+	except socket.error as e:
+		print(str(e))
+	print('Socket is listening..')
+	ServerSideSocket.listen(5)
 
 	while True:
-		c, addr = s.accept()
-
-		print_lock.acquire()
-		print('Conectado a: ', addr[0], ':', addr[1])
-
-		start_new_thread(threaded, (c,))
-	s.close()
-
+		Client, address = ServerSideSocket.accept()
+		print('Connected to: ' + address[0] + ':' + str(address[1]))
+		start_new_thread(multi_threaded_client, (Client, ))
+		ThreadCount += 1
+		print('Thread Number: ' + str(ThreadCount))
+	ServerSideSocket.close()
 
 if __name__ == '__main__':
 	main()
