@@ -23,22 +23,30 @@ def atendeClient(connection, address):
 		addressJSON = { "address" : address[0] + ':' + str(address[1]) }
 		dataJSON.update(addressJSON)
 
-		file = open("log.txt", "a")
+		filePath = 'backup/' + dataJSON['id'] + ".txt"
+		file = open(filePath, "w")
 		file.write(str(dataJSON) + ',\n')
 		file.close()
 
 		response = "Recebi a matriz do cliente " + dataJSON["id"] + ' (endereço ' + dataJSON["address"] + ')'
 
+		# processar o sinal
 		time.sleep(1 + random.random()*4)
 
 		connection.sendall(str.encode(response))
+
+		if os.path.exists(filePath):
+			os.remove(filePath)
+
 	connection.close()
 
 def main():
 	ServerSideSocket = socket.socket()
 	host = '127.0.0.1'
 	port = 2004
-	threadCount = 0
+	queue = []
+	processing = 0
+
 	try:
 		ServerSideSocket.bind((host, port))
 	except socket.error as e:
@@ -46,16 +54,17 @@ def main():
 	print('Socket is listening..')
 	ServerSideSocket.listen(5)
 
-	file = open("log.txt", "w")
-	file.write('')
-	file.close()
-
 	while True:
 		Client, address = ServerSideSocket.accept()
-		print('Connected to: ' + address[0] + ':' + str(address[1]))
-		start_new_thread(atendeClient, (Client, address,))
-		threadCount += 1
-		print('Thread Number: ' + str(threadCount))
+		print('Conectado a: ' + address[0] + ':' + str(address[1]))
+
+		queue.append({Client, address})
+		
+		if processing <= 5:
+			Cli, add = queue.pop(0)
+			processing += 1
+			start_new_thread(atendeClient, (Client, address,))
+
 	ServerSideSocket.close()
 
 if __name__ == '__main__':
