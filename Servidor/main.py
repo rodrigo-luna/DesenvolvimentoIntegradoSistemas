@@ -11,11 +11,12 @@ import json
 
 # ==================================================
 
+processing = 0
+
 def atendeClient(connection, address):
 	connection.send(str.encode('Server is working:'))
 	while True:
 		data = connection.recv(2048)
-
 		if not data:
 			break
 
@@ -35,6 +36,7 @@ def atendeClient(connection, address):
 
 		connection.sendall(str.encode(response))
 
+		processing -= 1
 		if os.path.exists(filePath):
 			os.remove(filePath)
 
@@ -45,7 +47,8 @@ def main():
 	host = '127.0.0.1'
 	port = 2004
 	queue = []
-	processing = 0
+	global processing
+	processingLimit = 5
 
 	try:
 		ServerSideSocket.bind((host, port))
@@ -60,10 +63,10 @@ def main():
 
 		queue.append({Client, address})
 		
-		if processing <= 5:
+		if processing <= processingLimit:
 			Cli, add = queue.pop(0)
 			processing += 1
-			start_new_thread(atendeClient, (Client, address,))
+			start_new_thread(atendeClient, (Cli, add,))
 
 	ServerSideSocket.close()
 

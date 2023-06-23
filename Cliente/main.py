@@ -16,11 +16,11 @@ PORT = 2004
 # ==================================================
 
 # apenas para teste
-def generateRandomMatrix(length):
-    matrix = ''
+def generateRandomSignal(length):
+    signal = ''
     for i in range (length):
-        matrix += str(random.randint(1000,9999)) + ','
-    return matrix
+        signal += str(random.randint(1000,9999)) + ','
+    return signal
 
 def client(i):
     ClientMultiSocket = socket.socket()
@@ -33,7 +33,7 @@ def client(i):
     
     msg = {
         "id": str(i),
-        "mat": generateRandomMatrix(20)
+        "mat": generateRandomSignal(20)
     }
 
     ClientMultiSocket.send( str.encode( json.dumps(msg) ) )
