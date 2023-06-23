@@ -7,6 +7,7 @@ import os
 from _thread import *
 import random
 import time
+import timeit
 import json
 
 # ==================================================
@@ -26,10 +27,14 @@ def atendeClient(connection, address):
 		file.write(str(dataJSON) + ',\n')
 		file.close()
 
-		response = "Recebi a matriz do cliente " + dataJSON["id"] + ' (endereço ' + dataJSON["address"] + ')'
+		response = "Matriz do cliente " + dataJSON["id"] + ' (endereço ' + dataJSON["address"] + ')'
 
 		# processar o sinal
+		startTime = timeit.default_timer ()
+
 		time.sleep(1 + random.random()*4)
+		
+		finishTime = timeit.default_timer ()
 		# fim processar o sinal
 
 		connection.sendall(str.encode(response))

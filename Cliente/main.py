@@ -33,12 +33,13 @@ def client(i):
     
     msg = {
         "id": str(i),
+        "mod": 1,
         "sig": generateRandomSignal(20)
     }
 
     ClientMultiSocket.send( str.encode( json.dumps(msg) ) )
     res = ClientMultiSocket.recv(2048)
-    print(res.decode('utf-8'))
+    print("Recebi: " + res.decode('utf-8'))
 
     ClientMultiSocket.close()
 
