@@ -33,7 +33,7 @@ def client(i):
     
     msg = {
         "id": str(i),
-        "mat": generateRandomSignal(20)
+        "sig": generateRandomSignal(20)
     }
 
     ClientMultiSocket.send( str.encode( json.dumps(msg) ) )

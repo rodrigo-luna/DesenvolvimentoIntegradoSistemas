@@ -19,8 +19,7 @@ def atendeClient(connection, address):
 			break
 
 		dataJSON = json.loads(data.decode('utf-8'))
-		addressJSON = { "address" : address[0] + ':' + str(address[1]) }
-		dataJSON.update(addressJSON)
+		dataJSON.update({ "address" : address[0] + ':' + str(address[1]) })
 
 		filePath = 'backup/' + dataJSON['id'] + ".txt"
 		file = open(filePath, "w")
@@ -31,6 +30,7 @@ def atendeClient(connection, address):
 
 		# processar o sinal
 		time.sleep(1 + random.random()*4)
+		# fim processar o sinal
 
 		connection.sendall(str.encode(response))
 
@@ -56,10 +56,8 @@ def main():
 	while True:
 		Client, address = ServerSideSocket.accept()
 		print('Conectado a: ' + address[0] + ':' + str(address[1]))
-		teste = [Client, address]
-		queue.append(teste)
+		queue.append([Client, address])
 
-		print (len(queue))
 		if len(queue) <= processingLimit:
 			Cli, add = queue.pop(0)
 			start_new_thread(atendeClient, (Cli, add,))
