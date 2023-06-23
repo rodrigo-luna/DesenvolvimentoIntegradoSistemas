@@ -11,8 +11,6 @@ import json
 
 # ==================================================
 
-processing = 0
-
 def atendeClient(connection, address):
 	connection.send(str.encode('Server is working:'))
 	while True:
@@ -36,7 +34,6 @@ def atendeClient(connection, address):
 
 		connection.sendall(str.encode(response))
 
-		processing -= 1
 		if os.path.exists(filePath):
 			os.remove(filePath)
 
@@ -47,7 +44,6 @@ def main():
 	host = '127.0.0.1'
 	port = 2004
 	queue = []
-	global processing
 	processingLimit = 5
 
 	try:
@@ -60,12 +56,12 @@ def main():
 	while True:
 		Client, address = ServerSideSocket.accept()
 		print('Conectado a: ' + address[0] + ':' + str(address[1]))
+		teste = [Client, address]
+		queue.append(teste)
 
-		queue.append({Client, address})
-		
-		if processing <= processingLimit:
+		print (len(queue))
+		if len(queue) <= processingLimit:
 			Cli, add = queue.pop(0)
-			processing += 1
 			start_new_thread(atendeClient, (Cli, add,))
 
 	ServerSideSocket.close()
