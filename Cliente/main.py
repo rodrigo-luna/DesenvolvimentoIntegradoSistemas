@@ -2,11 +2,13 @@
 # CLIENTE
 # ==================================================
 
+import json
+import numpy as np
+import random
 import socket
 import time
-import random
-import json
 from _thread import *
+from SignalBooster import SignalBooster
 
 # ==================================================
 
@@ -21,6 +23,12 @@ def generateRandomSignal(length):
     for i in range (length):
         signal += str(random.randint(1000,9999)) + ','
     return signal
+
+def should_boost_signal() -> bool:
+    return random.randint(0,1) == 0
+
+def boost_signal(matrix: np.matrix, s: int, n: int) -> np.matrix:
+    return SignalBooster.boost(matrix, s, n)
 
 def client(i):
     ClientMultiSocket = socket.socket()
