@@ -1,7 +1,4 @@
-from numpy import genfromtxt, zeros
 import sys
-#sys.path.append("Servidor")
-#import Servidor.reconstruction_algorithms as ra
 from Servidor import reconstruction_algorithms as ra
 
 def CGNETest():
