@@ -4,7 +4,11 @@ def calculate_error(residue: np.vector, previous_residue: np.vector) -> np.vecto
     return np.linalg.norm(residue) - np.linalg.norm(previous_residue)
 
 
-def conjugate_gradient_normal_error(base_signal: np.vector, model_matrix: np.matrix, initial_guess: np.vector, error_threshold: float = 0.0001, max_cycles: int = 1000) -> np.vector:
+def conjugate_gradient_normal_error(base_signal: np.vector,
+                                    model_matrix: np.matrix,
+                                    initial_guess: np.vector,
+                                    error_threshold: float = 0.0001,
+                                    max_cycles: int = 1000) -> np.vector:
     model_matrix_transpose = np.transpose(model_matrix)
     f = initial_guess;
     r = base_signal - np.matmul(model_matrix, f)
@@ -22,7 +26,8 @@ def conjugate_gradient_normal_error(base_signal: np.vector, model_matrix: np.mat
         r_next = r - np.matmul(alpha_H, p)
         r_next_transpose = np.transpose(r_next)
         beta_num = np.matmul(r_next_transpose, r_next)
-        beta = np.matmul(beta_num, reversed_alpha_den)
+        reversed_beta_den = np.linalg.inv(alpha_numerator)
+        beta = np.matmul(beta_num, reversed_beta_den)
         error = calculate_error(r_next, r)
         if (error < error_threshold):
             return f_next
