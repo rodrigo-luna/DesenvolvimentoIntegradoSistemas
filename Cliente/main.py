@@ -7,6 +7,7 @@ import numpy as np
 import random
 import socket
 import time
+import csv
 from _thread import *
 from SignalBooster import SignalBooster
 
@@ -14,6 +15,7 @@ from SignalBooster import SignalBooster
 
 HOST = '127.0.0.1'
 PORT = 2004
+DATA_PATH = 'C:/Users/rluna/Desktop/teste/data/'
 
 # ==================================================
 
@@ -30,6 +32,21 @@ def should_boost_signal() -> bool:
 def boost_signal(matrix: np.matrix, s: int, n: int) -> np.matrix:
     return SignalBooster.boost(matrix, s, n)
 
+def new_signal(s):
+    if s == 1: fileName = 'G-1.csv'
+    elif s == 2: fileName = 'G-2.csv'
+    elif s == 3: fileName = 'g-30x30-1.csv'
+    elif s == 4: fileName = 'g-30x30-2.csv'
+    elif s == 5: fileName = 'A-30x30-1.csv'
+    elif s == 6: fileName = 'A-30x30-2.csv'
+
+    with open(DATA_PATH + fileName, 'r') as file:
+        reader = csv.reader(file)
+        M = []
+        for row in reader:
+            M.append(row)
+        return M
+
 def client(i):
     ClientMultiSocket = socket.socket()
     print('Cliente número ' + str(i) + ' tentando conectar...')
@@ -38,11 +55,11 @@ def client(i):
     except socket.error as e:
         print(str(e))
     res = ClientMultiSocket.recv(1024)
-    
+
     msg = {
         "id": str(i),
-        "mod": 1,
-        "sig": generateRandomSignal(20)
+        "model": random.randint(1,2),
+        "signal": new_signal(random.randint(1,6))
     }
 
     ClientMultiSocket.send( str.encode( json.dumps(msg) ) )
