@@ -9,6 +9,7 @@ import random
 import time
 import timeit
 import json
+import reconstruction_algorithms
 
 # ==================================================
 
@@ -43,7 +44,7 @@ def atendeClient(connection, address):
 
 		numberIterations = 0
 		sizeInPixels = 0
-		
+
 		finishTime = timeit.default_timer ()
 		# fim processar o sinal
 

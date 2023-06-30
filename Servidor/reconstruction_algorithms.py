@@ -38,6 +38,45 @@ def conjugate_gradient_normal_error(base_signal: np.vector,
         r = r_next
         p = p_next
         alpha_numerator = beta_num
+        r_transpose = r_next_transpose
 
 
     return f
+
+
+def conjugate_gradient_normal_residual(base_signal: np.vector,
+                                       model_matrix: np.matrix,
+                                       initial_guess: np.vector,
+                                       error_threshold: float = 0.0001,
+                                       max_cycles: int = 1000) -> np.vector:
+     model_matrix_transpose = np.transpose(model_matrix)
+     f = initial_guess;
+     r = base_signal - np.matmul(model_matrix, f)
+     z = np.matmul(model_matrix_transpose, r)
+     p = z
+
+     alpha_num = np.power(np.linalg.norm(z), 2)
+     for i in range(max_cycles):
+         w = np.matmul(model_matrix, p)
+         alpha_den = np.power(np.linalg.norm(w), 2)
+         alpha = alpha_num / alpha_den
+         f_next = f + alpha * p
+         r_next = r - alpha * w
+
+         error = calculate_error(r_next, r)
+         if (error < error_threshold):
+             return f_next
+
+         z_next = np.matmul(model_matrix_transpose, r_next)
+         beta_num = np.power(np.linalg.norm(z_next), 2)
+         beta = beta_num / alpha_num
+         p_next = z_next + beta * p
+
+         f = f_next
+         r = r_next
+         z = z_next
+         p = p_next
+         alpha_num = beta_num
+
+
+     return f
