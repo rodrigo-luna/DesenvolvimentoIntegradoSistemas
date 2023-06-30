@@ -47,7 +47,8 @@ def client(i):
 
     ClientMultiSocket.send( str.encode( json.dumps(msg) ) )
     res = ClientMultiSocket.recv(2048)
-    print("Recebi: " + res.decode('utf-8'))
+    resJSON = json.loads( res.decode('utf-8') )
+    print("Recebi resposta do cliente: " + resJSON["id"])
 
     ClientMultiSocket.close()
 

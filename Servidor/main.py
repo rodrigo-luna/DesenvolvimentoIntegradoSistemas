@@ -22,22 +22,40 @@ def atendeClient(connection, address):
 		dataJSON = json.loads(data.decode('utf-8'))
 		dataJSON.update({ "address" : address[0] + ':' + str(address[1]) })
 
-		filePath = 'backup/' + dataJSON['id'] + ".txt"
+		filePath = 'backup/client_' + dataJSON['id'] + ".txt"
 		file = open(filePath, "w")
 		file.write(str(dataJSON) + ',\n')
 		file.close()
 
-		response = "Matriz do cliente " + dataJSON["id"] + ' (endereço ' + dataJSON["address"] + ')'
+		# response = "Matriz do cliente " + dataJSON["id"] + ' (endereço ' + dataJSON["address"] + ')'
 
 		# processar o sinal
 		startTime = timeit.default_timer ()
 
 		time.sleep(1 + random.random()*4)
+
+		if dataJSON["mod"] == 1:
+			# reconstrói a imagem com modelo 1
+			image = ""
+		elif dataJSON["mod"] == 2:
+			# reconstrói a imagem com modelo 2
+			image = ""
+
+		numberIterations = 0
+		sizeInPixels = 0
 		
 		finishTime = timeit.default_timer ()
 		# fim processar o sinal
 
-		connection.sendall(str.encode(response))
+		dataJSON.update({
+			"startTime" : startTime,
+			"finishTime" : finishTime,
+			"sizeInPixels" : sizeInPixels,
+			"numberIterations" : numberIterations,
+			"image" : image
+		})
+
+		connection.sendall(str.encode(json.dumps(dataJSON)))
 
 		if os.path.exists(filePath):
 			os.remove(filePath)
