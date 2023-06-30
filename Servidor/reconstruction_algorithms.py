@@ -1,14 +1,14 @@
 import numpy as np
 
-def calculate_error(residue: np.vector, previous_residue: np.vector) -> np.vector:
+def calculate_error(residue: np.array, previous_residue: np.array) -> np.array:
     return np.linalg.norm(residue) - np.linalg.norm(previous_residue)
 
 
-def conjugate_gradient_normal_error(base_signal: np.vector,
+def conjugate_gradient_normal_error(base_signal: np.array,
                                     model_matrix: np.matrix,
-                                    initial_guess: np.vector,
+                                    initial_guess: np.array,
                                     error_threshold: float = 0.0001,
-                                    max_cycles: int = 1000) -> np.vector:
+                                    max_cycles: int = 1000) -> np.array:
     model_matrix_transpose = np.transpose(model_matrix)
     f = initial_guess;
     r = base_signal - np.matmul(model_matrix, f)
@@ -39,16 +39,17 @@ def conjugate_gradient_normal_error(base_signal: np.vector,
         p = p_next
         alpha_numerator = beta_num
         r_transpose = r_next_transpose
+        print(str(error))
 
 
     return f
 
 
-def conjugate_gradient_normal_residual(base_signal: np.vector,
+def conjugate_gradient_normal_residual(base_signal: np.array,
                                        model_matrix: np.matrix,
-                                       initial_guess: np.vector,
+                                       initial_guess: np.array,
                                        error_threshold: float = 0.0001,
-                                       max_cycles: int = 1000) -> np.vector:
+                                       max_cycles: int = 1000) -> np.array:
      model_matrix_transpose = np.transpose(model_matrix)
      f = initial_guess;
      r = base_signal - np.matmul(model_matrix, f)
@@ -77,6 +78,7 @@ def conjugate_gradient_normal_residual(base_signal: np.vector,
          z = z_next
          p = p_next
          alpha_num = beta_num
+         print(str(error))
 
 
      return f
