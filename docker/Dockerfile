@@ -1,7 +1,7 @@
-FROM python:3.11.2
+FROM continuumio/anaconda3
 
 WORKDIR /usr/src/systems-integrated-development
 
-RUN pip install numpy
+RUN conda install numpy scipy
 
 ENTRYPOINT [ "/bin/bash" ]

@@ -11,7 +11,15 @@ import timeit
 import json
 import reconstruction_algorithms
 
+from numpy import genfromtxt, zeros
+
 # ==================================================
+
+error_threshold = 0.1
+max_calc_cycles = 10
+
+def decide_reconstruction_algorithm() -> str:
+	return "CGNE"
 
 def atendeClient(connection, address):
 	connection.send(str.encode('Server is working:'))
@@ -33,14 +41,33 @@ def atendeClient(connection, address):
 		# processar o sinal
 		startTime = timeit.default_timer ()
 
-		time.sleep(1 + random.random()*4)
-
+		model_matrix = []
+		initial_guess[]
 		if dataJSON["mod"] == 1:
 			# reconstrói a imagem com modelo 1
-			image = ""
-		elif dataJSON["mod"] == 2:
+			model_matrix = genfromtxt("Servidor/data/H-1.csv", delimiter=",")
+			initial_guess = zeros((3600),1))
+
+		else:
 			# reconstrói a imagem com modelo 2
-			image = ""
+			model_matrix = genfromtxt("Servidor/data/H-2.csv", delimiter=",")
+			initial_guess = zeros((900,1))
+
+		image = []
+		if (decide_reconstruction_algorithm() == "CGNE"):
+			image = reconstruction_algorithms.conjugate_gradient_normal_error(
+				g,
+				model_matrix,
+				initial_guess,
+				error_threshold=error_threshold,
+				max_cycles=max_calc_cycles)
+
+		else: 
+			image = reconstruction_algorithms.conjugate_gradient_normal_residual(g,
+				model_matrix,
+				initial_guess, 
+				error_threshold=error_threshold,
+				max_cycles=max_calc_cycles)
 
 		numberIterations = 0
 		sizeInPixels = 0
