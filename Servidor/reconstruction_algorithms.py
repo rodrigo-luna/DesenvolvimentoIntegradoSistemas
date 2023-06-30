@@ -10,7 +10,7 @@ def conjugate_gradient_normal_error(base_signal: np.array,
                                     error_threshold: float = 0.0001,
                                     max_cycles: int = 1000) -> np.array:
     model_matrix_transpose = np.transpose(model_matrix)
-    f = initial_guess;
+    f = initial_guess
     r = base_signal - np.matmul(model_matrix, f)
     p = np.matmul(model_matrix_transpose, r)
 
@@ -51,7 +51,7 @@ def conjugate_gradient_normal_residual(base_signal: np.array,
                                        error_threshold: float = 0.0001,
                                        max_cycles: int = 1000) -> np.array:
      model_matrix_transpose = np.transpose(model_matrix)
-     f = initial_guess;
+     f = initial_guess
      r = base_signal - np.matmul(model_matrix, f)
      z = np.matmul(model_matrix_transpose, r)
      p = z
