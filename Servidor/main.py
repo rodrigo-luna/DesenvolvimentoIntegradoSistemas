@@ -24,11 +24,12 @@ def decide_reconstruction_algorithm() -> str:
 def atendeClient(connection, address):
 	connection.send(str.encode('Server is working:'))
 	while True:
-		data = connection.recv(2048)
+		data = connection.recv(65536)
 		if not data:
 			break
-
-		dataJSON = json.loads(data.decode('utf-8'))
+		d = data.decode('utf-8')
+		print (d)
+		dataJSON = json.loads(d)
 		dataJSON.update({ "address" : address[0] + ':' + str(address[1]) })
 
 		filePath = 'backup/client_' + dataJSON['id'] + ".txt"
@@ -36,44 +37,43 @@ def atendeClient(connection, address):
 		file.write(str(dataJSON) + ',\n')
 		file.close()
 
-		# response = "Matriz do cliente " + dataJSON["id"] + ' (endereço ' + dataJSON["address"] + ')'
-
-		# processar o sinal
+		# ========== processar o sinal ==========
 		startTime = timeit.default_timer ()
 
 		model_matrix = []
-		initial_guess[]
-		if dataJSON["mod"] == 1:
-			# reconstrói a imagem com modelo 1
-			model_matrix = genfromtxt("Servidor/data/H-1.csv", delimiter=",")
-			initial_guess = zeros((3600),1))
+		initial_guess = []
+		# if dataJSON["mod"] == 1:
+		# 	# reconstrói a imagem com modelo 1
+		# 	model_matrix = genfromtxt("Servidor/data/H-1.csv", delimiter=",")
+		# 	initial_guess = zeros((3600),1)
 
-		else:
-			# reconstrói a imagem com modelo 2
-			model_matrix = genfromtxt("Servidor/data/H-2.csv", delimiter=",")
-			initial_guess = zeros((900,1))
+		# else:
+		# 	# reconstrói a imagem com modelo 2
+		# 	model_matrix = genfromtxt("Servidor/data/H-2.csv", delimiter=",")
+		# 	initial_guess = zeros((900,1))
 
 		image = []
-		if (decide_reconstruction_algorithm() == "CGNE"):
-			image = reconstruction_algorithms.conjugate_gradient_normal_error(
-				g,
-				model_matrix,
-				initial_guess,
-				error_threshold=error_threshold,
-				max_cycles=max_calc_cycles)
+		# if (decide_reconstruction_algorithm() == "CGNE"):
+		# 	image = reconstruction_algorithms.conjugate_gradient_normal_error(
+		# 		dataJSON["signal"],
+		# 		model_matrix,
+		# 		initial_guess,
+		# 		error_threshold=error_threshold,
+		# 		max_cycles=max_calc_cycles)
 
-		else: 
-			image = reconstruction_algorithms.conjugate_gradient_normal_residual(g,
-				model_matrix,
-				initial_guess, 
-				error_threshold=error_threshold,
-				max_cycles=max_calc_cycles)
+		# else: 
+		# 	image = reconstruction_algorithms.conjugate_gradient_normal_residual(
+		# 		dataJSON["signal"],
+		# 		model_matrix,
+		# 		initial_guess, 
+		# 		error_threshold=error_threshold,
+		# 		max_cycles=max_calc_cycles)
 
 		numberIterations = 0
 		sizeInPixels = 0
 
 		finishTime = timeit.default_timer ()
-		# fim processar o sinal
+		# ========== fim processar o sinal ==========
 
 		dataJSON.update({
 			"startTime" : startTime,
@@ -95,7 +95,8 @@ def main():
 	host = '127.0.0.1'
 	port = 2004
 	queue = []
-	processingLimit = 5
+	queueLimit= 1
+	processingLimit = 1
 
 	try:
 		ServerSideSocket.bind((host, port))
@@ -107,7 +108,8 @@ def main():
 	while True:
 		Client, address = ServerSideSocket.accept()
 		print('Conectado a: ' + address[0] + ':' + str(address[1]))
-		queue.append([Client, address])
+		if len(queue) < queueLimit:
+			queue.append([Client, address])
 
 		if len(queue) <= processingLimit:
 			Cli, add = queue.pop(0)
