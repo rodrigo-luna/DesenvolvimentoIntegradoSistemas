@@ -1,4 +1,6 @@
 import numpy as np
+from os import environ
+environ['OMP_NUM_THREADS'] = '4'
 
 def calculate_error(residue: np.array, previous_residue: np.array) -> np.array:
     return np.linalg.norm(residue) - np.linalg.norm(previous_residue)
@@ -9,19 +11,20 @@ def conjugate_gradient_normal_error(base_signal: np.array,
                                     initial_guess: np.array,
                                     error_threshold: float = 0.0001,
                                     max_cycles: int = 1000) -> np.array:
-    model_matrix_transpose = np.transpose(model_matrix)
-    f = initial_guess
-    r = base_signal - np.matmul(model_matrix, f)
-    p = np.matmul(model_matrix_transpose, r)
+    a = model_matrix @ initial_guess
+    r = np.subtract(base_signal, a)
+    p = np.matmul(np.transpose(model_matrix), r)
+    print("p calculated")
 
-    r_transpose = np.transpose(r)
-    alpha_numerator = np.matmul(r_transpose, r)
+    alpha_numerator = np.matmul(np.transpose(r), r)
+    print("alpha calculated")
     for i in range(max_cycles):
+        print(i)
         p_transpose = np.transpose(p)
         alpha_den = np.matmul(p_transpose, p)
         reversed_alpha_den = np.linalg.inv(alpha_den)
         alpha = np.matmul(alpha_numerator, reversed_alpha_den)
-        f_next = f + np.matmul(alpha, p)
+        f_next = initial_guess + np.matmul(alpha, p)
         alpha_H = np.matmul(alpha, model_matrix)
         r_next = r - np.matmul(alpha_H, p)
         r_next_transpose = np.transpose(r_next)
@@ -32,9 +35,9 @@ def conjugate_gradient_normal_error(base_signal: np.array,
         if (error < error_threshold):
             return f_next
 
-        p_next = np.matmul(model_matrix_transpose, r_next) + np.matmul(beta, p)
+        p_next = np.matmul(np.transpose(model_matrix), r_next) + np.matmul(beta, p)
 
-        f = f_next
+        initial_guess = f_next
         r = r_next
         p = p_next
         alpha_numerator = beta_num

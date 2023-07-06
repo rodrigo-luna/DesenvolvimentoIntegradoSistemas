@@ -1,4 +1,5 @@
 from numpy import genfromtxt, zeros
+from scipy import sparse
 from Servidor import reconstruction_algorithms as ra
 
 def CGNETest():
@@ -7,10 +8,10 @@ def CGNETest():
     csv_delimiter = ","
 
     g = genfromtxt(signal_matrix_path, delimiter=csv_delimiter)
+    g = sparse.coo_matrix(g)
     H = genfromtxt(model_matrix_path, delimiter=csv_delimiter)
+    H = sparse.coo_matrix(g)
     initial_guess = zeros((900,1))
-    print(initial_guess)
-    print(H)
 
     ra.conjugate_gradient_normal_error(g, H, initial_guess, max_cycles=12)
 
