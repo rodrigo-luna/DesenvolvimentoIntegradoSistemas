@@ -17,11 +17,13 @@ from numpy import genfromtxt, zeros
 
 error_threshold = 0.1
 max_calc_cycles = 10
+processing = 0
 
 def decide_reconstruction_algorithm() -> str:
 	return "CGNE"
 
 def atendeClient(connection, address):
+	global processing
 	connection.send(str.encode('Server is working:'))
 	while True:
 		data = connection.recv(65536)
@@ -42,15 +44,18 @@ def atendeClient(connection, address):
 
 		model_matrix = []
 		initial_guess = []
-		# if dataJSON["mod"] == 1:
-		# 	# reconstrói a imagem com modelo 1
-		# 	model_matrix = genfromtxt("Servidor/data/H-1.csv", delimiter=",")
-		# 	initial_guess = zeros((3600),1)
-
-		# else:
-		# 	# reconstrói a imagem com modelo 2
-		# 	model_matrix = genfromtxt("Servidor/data/H-2.csv", delimiter=",")
-		# 	initial_guess = zeros((900,1))
+		if dataJSON["model"] == 1:
+			# reconstrói a imagem com modelo 1
+			# model_matrix = genfromtxt("Servidor/data/H-1.csv", delimiter=",")
+			# initial_guess = zeros((3600),1)
+			sizeInPixels = 3600
+		elif dataJSON["model"] == 2:
+			# reconstrói a imagem com modelo 2
+			# model_matrix = genfromtxt("Servidor/data/H-2.csv", delimiter=",")
+			# initial_guess = zeros((900,1))
+			sizeInPixels = 900
+		else:
+			break
 
 		image = []
 		# if (decide_reconstruction_algorithm() == "CGNE"):
@@ -68,13 +73,15 @@ def atendeClient(connection, address):
 		# 		initial_guess, 
 		# 		error_threshold=error_threshold,
 		# 		max_cycles=max_calc_cycles)
-
 		numberIterations = 0
-		sizeInPixels = 0
+
+		# simular o processamento
+		time.sleep(random.randint(3,5))
 
 		finishTime = timeit.default_timer ()
 		# ========== fim processar o sinal ==========
 
+		del dataJSON['signal']
 		dataJSON.update({
 			"startTime" : startTime,
 			"finishTime" : finishTime,
@@ -84,19 +91,21 @@ def atendeClient(connection, address):
 		})
 
 		connection.sendall(str.encode(json.dumps(dataJSON)))
-
+		processing -= 1
 		if os.path.exists(filePath):
 			os.remove(filePath)
 
 	connection.close()
 
 def main():
+	global processing
 	ServerSideSocket = socket.socket()
 	host = '127.0.0.1'
 	port = 2004
 	queue = []
 	queueLimit= 1
-	processingLimit = 1
+	processing = 0
+	processingLimit = 5
 
 	try:
 		ServerSideSocket.bind((host, port))
@@ -111,8 +120,9 @@ def main():
 		if len(queue) < queueLimit:
 			queue.append([Client, address])
 
-		if len(queue) <= processingLimit:
+		if processing <= processingLimit:
 			Cli, add = queue.pop(0)
+			processing += 1
 			start_new_thread(atendeClient, (Cli, add,))
 
 	ServerSideSocket.close()

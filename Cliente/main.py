@@ -35,14 +35,12 @@ def new_signal(m, s):
         elif s == 2: fileName = 'g-30x30-2.csv'
         elif s == 3: fileName = 'A-30x30-1.csv'
 
-    return np.genfromtxt(DATA_PATH + fileName, delimiter=",")
+    signal = np.genfromtxt(DATA_PATH + fileName, delimiter=",")
 
-    # with open(DATA_PATH + fileName, 'r') as file:
-    #     reader = csv.reader(file)
-    #     M = []
-    #     for row in reader:
-    #         M.append(row)
-    #     return M
+    if should_boost_signal:
+        signal = boost_signal(signal, 436, 64)
+
+    return signal
 
 def client(i):
     ClientMultiSocket = socket.socket()
@@ -64,14 +62,13 @@ def client(i):
     res = ClientMultiSocket.recv(65536)
     resJSON = json.loads( res.decode('utf-8') )
     print("Recebi resposta do cliente: " + resJSON["id"])
-
+    print (resJSON)
     ClientMultiSocket.close()
-
 
 def main():
     for i in range (50):
         start_new_thread(client, (i,))
-        time.sleep(5)
-        
+        time.sleep(3)
+
 if __name__ == '__main__':
 	main()

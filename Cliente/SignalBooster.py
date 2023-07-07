@@ -8,7 +8,7 @@ class SignalBooster(object):
         for c in range(n):
             for l in range(s):
                 gamma = 100 + 1/20 * l * np.sqrt(l)
-                print(gamma)
+                # print(gamma)
 
                 result[c+l] = matrix[c+l] * gamma
 
