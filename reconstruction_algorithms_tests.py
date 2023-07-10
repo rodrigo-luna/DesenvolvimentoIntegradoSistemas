@@ -12,7 +12,7 @@ def CGNETest():
     print(initial_guess)
     print(H)
 
-    ra.conjugate_gradient_normal_error(g, H, initial_guess, max_cycles=12)
+    ra.conjugate_gradient_normal_error(g, H, initial_guess, max_cycles=5)
 
 
 def CGNRTest():
