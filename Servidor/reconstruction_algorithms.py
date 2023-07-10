@@ -1,82 +1,66 @@
 import numpy as np
 
-def calculate_error(residue: np.array, previous_residue: np.array) -> np.array:
-    return np.linalg.norm(residue) - np.linalg.norm(previous_residue)
-
-
 def conjugate_gradient_normal_error(base_signal: np.array,
-                                    model_matrix: np.matrix,
+                                    model_matrix: np.array,
                                     initial_guess: np.array,
-                                    error_threshold: float = 0.0001,
-                                    max_cycles: int = 1000) -> np.array:
-    model_matrix_transpose = np.transpose(model_matrix)
+                                    max_cycles: int) -> np.array:
+    
     f = initial_guess
     r = base_signal - np.matmul(model_matrix, f)
-    p = np.matmul(model_matrix_transpose, r)
+    p = np.matmul(np.transpose(model_matrix), r)
 
-    r_transpose = np.transpose(r)
-    alpha_numerator = np.matmul(r_transpose, r)
     for i in range(max_cycles):
-        p_transpose = np.transpose(p)
-        alpha_den = np.matmul(p_transpose, p)
-        reversed_alpha_den = np.linalg.inv(alpha_den)
-        alpha = np.matmul(alpha_numerator, reversed_alpha_den)
-        f_next = f + np.matmul(alpha, p)
-        alpha_H = np.matmul(alpha, model_matrix)
-        r_next = r - np.matmul(alpha_H, p)
-        r_next_transpose = np.transpose(r_next)
-        beta_num = np.matmul(r_next_transpose, r_next)
-        reversed_beta_den = np.linalg.inv(alpha_numerator)
-        beta = np.matmul(beta_num, reversed_beta_den)
+        r_transpose = np.transpose(r)
+        alpha = np.matmul( np.matmul(r_transpose, r), np.linalg.inv( np.matmul(np.transpose(p), p) ) )
+        f_next = f + alpha * p
+        r_next = r - np.matmul( (alpha * model_matrix), p )
+        # r_next_transpose = np.transpose(r_next)
+        beta = np.matmul( np.matmul(np.transpose(r_next), r_next), np.linalg.inv( np.matmul(np.transpose(r),r) ) )
+        
         error = np.linalg.norm(r_next) - np.linalg.norm(r)
-        if (error < error_threshold):
+        print ('Erro no ciclo ' + str(i) + ':')
+        print (error)
+        if (error < 0.0001):
             return f_next
 
-        p_next = np.matmul(model_matrix_transpose, r_next) + np.matmul(beta, p)
+        p_next = np.matmul(np.transpose(model_matrix), r_next) + beta * p
 
         f = f_next
         r = r_next
         p = p_next
-        alpha_numerator = beta_num
-        r_transpose = r_next_transpose
-        print(str(error))
-        
-
 
     return f
 
 
 def conjugate_gradient_normal_residual(base_signal: np.array,
-                                       model_matrix: np.matrix,
-                                       initial_guess: np.array,
-                                       error_threshold: float = 0.0001,
-                                       max_cycles: int = 1000) -> np.array:
-     f = initial_guess
-     r = base_signal - np.matmul(model_matrix, f)
-     z = np.matmul(np.transpose(model_matrix), r)
-     p = z
+                                    model_matrix: np.array,
+                                    initial_guess: np.array,
+                                    max_cycles: int):
+    
+    f = initial_guess
+    r = base_signal - np.matmul(model_matrix, f)
+    z = np.matmul(model_matrix.transpose(), r)
+    p = z
 
-     alpha_num = np.linalg.norm(z)^2
-     for i in range(max_cycles):
-         w = np.matmul(model_matrix, p)
-         alpha = alpha_num / np.linalg.norm(w)^2
-         f_next = f + alpha * p
-         r_next = r - alpha * w
+    for i in range(max_cycles):
+        w = np.matmul(model_matrix, p)
+        alpha = (np.linalg.norm(z, ord=2))**2 / (np.linalg.norm(w, ord=2))**2
+        f_next = f + alpha * p
+        r_next = r - alpha * w
 
-         error = np.linalg.norm(r_next) - np.linalg.norm(r)
-         if (error < error_threshold):
-             return f_next
+        error = abs(np.linalg.norm(r_next, ord=2) - np.linalg.norm(r, ord=2))
+        print ('Erro no ciclo ' + str(i) + ':')
+        print (error)
+        if (error < 0.0001):
+            return f_next, i+1
 
-         z_next = np.matmul(np.transpose(model_matrix), r_next)
-         beta = np.linalg.norm(z_next)^2 / alpha_num
-         p_next = z_next + beta * p
+        z_next = np.matmul(np.transpose(model_matrix), r_next)
+        beta = (np.linalg.norm(z_next))**2 / (np.linalg.norm(z))**2
+        p_next = z_next + beta * p
 
-         f = f_next
-         r = r_next
-         z = z_next
-         p = p_next
-         alpha_num = np.linalg.norm(z_next)^2
-         print(str(error))
+        f = f_next
+        r = r_next
+        z = z_next
+        p = p_next
 
-
-     return f
+    return f, i+1

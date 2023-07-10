@@ -5,13 +5,13 @@
 import socket
 import os
 from _thread import *
-import random
-import time
 import timeit
 import json
+import csv
+import cv2
 import reconstruction_algorithms
 
-from numpy import genfromtxt, zeros
+import numpy as np
 
 # ==================================================
 
@@ -19,19 +19,14 @@ error_threshold = 0.1
 max_calc_cycles = 10
 processing = 0
 
-def decide_reconstruction_algorithm() -> str:
-	return "CGNE"
-
 def atendeClient(connection, address):
 	global processing
 	connection.send(str.encode('Server is working:'))
 	while True:
-		data = connection.recv(65536)
+		data = connection.recv(65536*32)
 		if not data:
 			break
-		d = data.decode('utf-8')
-		print (d)
-		dataJSON = json.loads(d)
+		dataJSON = json.loads(data.decode('utf-8'))
 		dataJSON.update({ "address" : address[0] + ':' + str(address[1]) })
 
 		filePath = 'backup/client_' + dataJSON['id'] + ".txt"
@@ -42,52 +37,43 @@ def atendeClient(connection, address):
 		# ========== processar o sinal ==========
 		startTime = timeit.default_timer ()
 
-		model_matrix = []
-		initial_guess = []
 		if dataJSON["model"] == 1:
-			# reconstrói a imagem com modelo 1
-			# model_matrix = genfromtxt("Servidor/data/H-1.csv", delimiter=",")
-			# initial_guess = zeros((3600),1)
+			file = open('Servidor/data/H-1.csv', "r")
+			H = list(csv.reader(file))
+			file.close()
+			H = np.array(H, dtype=float)
+			
+			image, numberIterations = reconstruction_algorithms.conjugate_gradient_normal_error(
+				np.array(dataJSON["signal"], dtype=float),
+				H,
+				np.zeros((3600,1)),
+				50)
 			sizeInPixels = 3600
+
 		elif dataJSON["model"] == 2:
-			# reconstrói a imagem com modelo 2
-			# model_matrix = genfromtxt("Servidor/data/H-2.csv", delimiter=",")
-			# initial_guess = zeros((900,1))
+			file = open('Servidor/data/H-2.csv', "r")
+			H = list(csv.reader(file))
+			file.close()
+			H = np.array(H, dtype=float)
+
+			image, numberIterations = reconstruction_algorithms.conjugate_gradient_normal_residual(
+				np.array(dataJSON["signal"], float),
+				H,
+				np.zeros((900,1)),
+				50)
 			sizeInPixels = 900
 		else:
 			break
-
-		image = []
-		# if (decide_reconstruction_algorithm() == "CGNE"):
-		# 	image = reconstruction_algorithms.conjugate_gradient_normal_error(
-		# 		dataJSON["signal"],
-		# 		model_matrix,
-		# 		initial_guess,
-		# 		error_threshold=error_threshold,
-		# 		max_cycles=max_calc_cycles)
-
-		# else: 
-		# 	image = reconstruction_algorithms.conjugate_gradient_normal_residual(
-		# 		dataJSON["signal"],
-		# 		model_matrix,
-		# 		initial_guess, 
-		# 		error_threshold=error_threshold,
-		# 		max_cycles=max_calc_cycles)
-		numberIterations = 0
-
-		# simular o processamento
-		time.sleep(random.randint(3,5))
 
 		finishTime = timeit.default_timer ()
 		# ========== fim processar o sinal ==========
 
 		del dataJSON['signal']
 		dataJSON.update({
-			"startTime" : startTime,
-			"finishTime" : finishTime,
+			"reconstructionTime" : finishTime - startTime,
 			"sizeInPixels" : sizeInPixels,
 			"numberIterations" : numberIterations,
-			"image" : image
+			"image" : image.tolist()
 		})
 
 		connection.sendall(str.encode(json.dumps(dataJSON)))
@@ -112,7 +98,7 @@ def main():
 	except socket.error as e:
 		print(str(e))
 	print('Socket is listening..')
-	ServerSideSocket.listen(5)
+	ServerSideSocket.listen(10)
 
 	while True:
 		Client, address = ServerSideSocket.accept()
