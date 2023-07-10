@@ -23,14 +23,14 @@ def CGNRTest():
     g = genfromtxt(signal_matrix_path, delimiter=csv_delimiter)
     H = genfromtxt(model_matrix_path, delimiter=csv_delimiter)
     initial_guess = zeros((900,1))
-    print(initial_guess)
-    print(H)
+    # print(initial_guess)
+    # print(H)
 
     ra.conjugate_gradient_normal_residual(g, H, initial_guess, max_cycles=5)
 
 
 def main():
-    CGNETest()
+    CGNRTest()
 
 
 if __name__ == '__main__':
